@@ -5,7 +5,18 @@ import ProductList from "../components/productList";
 
 function index() {
   const [isOpen, setIsOpen] = useState(false);
-  const [products, setProducts] = useState([]); 
+  const [products, setProducts] = useState([]);
+  const [productId, setProductId] = useState([]);
+  useEffect(() => {
+    const ids = products.map(product => {
+      return {
+        id: product.id
+      }
+    });
+    setProductId(ids);
+  }, [products]);
+
+
   function handleProductsSelection(payload) {
     setIsOpen(false);
     setProducts(payload.selection);
@@ -16,7 +27,8 @@ function index() {
         resourceType="Product" 
         open={isOpen}
         onCancel={() => setIsOpen(false)}
-        onSelection={handleProductsSelection} 
+        onSelection={handleProductsSelection}
+        initialSelectionIds={productId}
        />
     {products.length > 0 ? (
       <Page
