@@ -1,12 +1,23 @@
 import { ResourcePicker } from "@shopify/app-bridge-react";
-import { EmptyState, Page } from "@shopify/polaris";
-import React, { useState } from 'react'
-import ProductList from "../components/productList";
+import React, { useState, useEffect } from 'react'
+import ProductEmptyState from "../components/productEmptyState";
+import ProductPage from "../components/productPage";
+import store from 'store-js';
 
-function index() {
+
+
+function index({ host }) {
   const [isOpen, setIsOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const [productId, setProductId] = useState([]);
+
+  useEffect(() => {
+    const productList = store.get(`${host}-products`);
+    if(productList) {
+      setProducts(productList);
+    }
+  }, []);
+
   useEffect(() => {
     const ids = products.map(product => {
       return {
@@ -20,6 +31,7 @@ function index() {
   function handleProductsSelection(payload) {
     setIsOpen(false);
     setProducts(payload.selection);
+    store.set(`${host}-products`, payload.selection);
   }
   return (
     <>
@@ -29,28 +41,11 @@ function index() {
         onCancel={() => setIsOpen(false)}
         onSelection={handleProductsSelection}
         initialSelectionIds={productId}
-       />
+       /> 
     {products.length > 0 ? (
-      <Page
-      title="Product Selector"
-      primaryAction={{
-        content: "Select product", 
-        onAction: () => setIsOpen(true)
-      }}>
-
-        <ProductList products={products} />
-      </Page>
+      <ProductPage setIsOpen={setIsOpen} products={products}/>
      ) : (
-      <EmptyState
-      heading="Manage the product you want to display"
-      action={{
-        content: "Select products",
-        onAction: () => setIsOpen(true),
-        
-      }}
-      image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png">
-        <p>Select the products you want to use on your banner</p>
-      </EmptyState>
+       <ProductEmptyState setIsOpen={setIsOpen} />
     )}
    </> 
   );
